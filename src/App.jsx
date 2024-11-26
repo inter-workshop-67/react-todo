@@ -1,119 +1,88 @@
 import React, { useState } from 'react';
-import { Trash2, Edit2, Check, X } from 'lucide-react';
-import './TodoApp.css';
 
 const TodoApp = () => {
   const [todos, setTodos] = useState([]);
-  const [newTodo, setNewTodo] = useState('');
-  const [editingId, setEditingId] = useState(null);
-  const [editingText, setEditingText] = useState('');
+  const [inputValue, setInputValue] = useState('');
 
-  const addTodo = (e) => {
-    e.preventDefault();
-    if (newTodo.trim()) {
-      setTodos([...todos, {
-        id: Date.now(),
-        text: newTodo.trim(),
-        completed: false
-      }]);
-      setNewTodo('');
+  const addTodo = () => {
+    if (inputValue.trim() !== '') {
+      setTodos([
+        ...todos, 
+        { 
+          id: Date.now(), 
+          text: inputValue, 
+          completed: false 
+        }
+      ]);
+      setInputValue('');
     }
+  };
+
+  const toggleTodo = (id) => {
+    setTodos(todos.map(todo => 
+      todo.id === id 
+        ? { ...todo, completed: !todo.completed } 
+        : todo
+    ));
   };
 
   const deleteTodo = (id) => {
     setTodos(todos.filter(todo => todo.id !== id));
   };
 
-  const startEditing = (todo) => {
-    setEditingId(todo.id);
-    setEditingText(todo.text);
-  };
-
-  const saveEdit = (id) => {
-    setTodos(todos.map(todo =>
-      todo.id === id ? { ...todo, text: editingText } : todo
-    ));
-    setEditingId(null);
-  };
-
-  const toggleComplete = (id) => {
-    setTodos(todos.map(todo =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    ));
-  };
-
   return (
-    <div className="todo-container">
-      <h1 className="todo-title">Todo List</h1>
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+      <h1 className="text-2xl font-bold mb-4 text-center text-gray-800">Todo List</h1>
       
-      <form onSubmit={addTodo} className="todo-form">
-        <input
-          type="text"
-          value={newTodo}
-          onChange={(e) => setNewTodo(e.target.value)}
+      <div className="flex mb-4">
+        <input 
+          type="text" 
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && addTodo()}
           placeholder="Add a new todo"
-          className="todo-input"
+          className="flex-grow p-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <button type="submit" className="add-button">
+        <button 
+          onClick={addTodo}
+          className="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 transition duration-300"
+        >
           Add
         </button>
-      </form>
+      </div>
 
-      <ul className="todo-list">
+      <ul className="space-y-2">
         {todos.map(todo => (
-          <li key={todo.id} className="todo-item">
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => toggleComplete(todo.id)}
-              className="todo-checkbox"
-            />
-            
-            {editingId === todo.id ? (
-              <div className="edit-container">
-                <input
-                  type="text"
-                  value={editingText}
-                  onChange={(e) => setEditingText(e.target.value)}
-                  className="edit-input"
-                />
-                <button
-                  onClick={() => saveEdit(todo.id)}
-                  className="icon-button save-button"
-                >
-                  <Check size={16} />
-                </button>
-                <button
-                  onClick={() => setEditingId(null)}
-                  className="icon-button cancel-button"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            ) : (
-              <>
-                <span className={`todo-text ${todo.completed ? 'completed' : ''}`}>
-                  {todo.text}
-                </span>
-                <div className="button-container">
-                  <button
-                    onClick={() => startEditing(todo)}
-                    className="icon-button edit-button"
-                  >
-                    <Edit2 size={16} />
-                  </button>
-                  <button
-                    onClick={() => deleteTodo(todo.id)}
-                    className="icon-button delete-button"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </>
-            )}
+          <li 
+            key={todo.id} 
+            className="flex items-center justify-between p-3 bg-gray-100 rounded-md"
+          >
+            <div className="flex items-center">
+              <input 
+                type="checkbox"
+                checked={todo.completed}
+                onChange={() => toggleTodo(todo.id)}
+                className="mr-3 form-checkbox h-5 w-5 text-blue-600"
+              />
+              <span 
+                className={`${todo.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}
+              >
+                {todo.text}
+              </span>
+            </div>
+            <button 
+              onClick={() => deleteTodo(todo.id)}
+              className="text-red-500 hover:text-red-700 transition duration-300"
+            >
+              Delete
+            </button>
           </li>
         ))}
       </ul>
+
+      {todos.length === 0 && (
+        <p className="text-center text-gray-500 mt-4">No todos yet. Add a todo!</p>
+      )}
     </div>
   );
 };
